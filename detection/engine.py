@@ -25,8 +25,8 @@ class DetectionEngine:
 
             self.detectors.extend([
                 SYNFloodDetector(),
-                PortScanDetector(),
                 ICMPFloodDetector(),
+                PortScanDetector(),
                 BruteForceDetector()
             ])
             logger.info(f"Successfully loaded {len(self.detectors)} detection modules into BreacherIPS.")
