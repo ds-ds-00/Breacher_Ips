@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*$py.class
+database/breacherips.db
+*.db
+*.sqlite3
+ips_env/
+.venv/
+venv/
+ENV/
+.DS_Store
+.Thumds.db
