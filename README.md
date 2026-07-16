@@ -5,31 +5,41 @@ A multi-threaded, asynchronous Host-based Intrusion Prevention System (HIPS) eng
 ##  Architectural Topology
 
 The system uses an asynchronous execution queue to guarantee zero-drop packet monitoring under intense traffic streams.
-
-                                  ┌──────────────────────┐
-                                  │  Raw Network Socket  │
-                                  └──────────┬───────────┘
-                                             │
-                                             ▼ [Scapy Sniffer Loop]
-                                  ┌──────────────────────┐
-                                  │   Asynchronous Queue │
-                                  └──────────┬───────────┘
-                                             │
-                                             ▼ [ExtractorWorker Thread]
-                                  ┌──────────────────────┐
-                                  │  Feature Extraction  │
-                                  └──────────┬───────────┘
-                                             │
-                                             ▼ Normalized Data
-                                  ┌──────────────────────┐
-                                  │   Detection Engine   │
-                                  └────┬────────────┬────┘
-                                       │            │
-         [Stateful Modules Evaluation] │            │
-(SYN Flood, Port Scan, ICMP Flood, BF) │            │
-                                       ▼            ▼
-                 ┌───────────────────────┐        ┌───────────────────────┐
-                 │  FirewallController   │        │    DatabaseManager    │
-                 └──────────┬────────────┘        └──────────┬────────────┘
-                            │                                │
-                  [Netfilter/iptables]             [Thread-Safe SQLite]
+       ┌──────────────────────┐
+       ┌──────────────────────┐
+       │  Raw Network Socket  │
+       └──────────┬───────────┘
+                  │
+                  ▼ [Scapy Sniffer Loop]
+       ┌──────────────────────┐
+       │  Asynchronous Queue  │
+       └──────────┬───────────┘
+                  │
+                  ▼ [ExtractorWorker Thread]
+       ┌──────────────────────┐
+       │  Feature Extraction  │
+       └──────────┬───────────┘
+                  │
+                  ▼ [Normalized Data]
+       ┌──────────────────────┐
+       │   Detection Engine   │
+       └────┬────────────┬────┘
+            │            │
+            │ Evaluate   │ Evaluate
+            ▼ Modules    ▼ Components
+   ┌────────────────┐   ┌─────────────────┐
+   │ Stateful Rule  │   │ DatabaseManager │
+   │   Evaluator    │   └────────┬────────┘
+   └────────┬───────┘            │
+            │                    ▼ [Thread-Safe Commit]
+            ▼ Alert Triaged     ┌─────────────────┐
+   ┌────────────────┐           │ SQLite Storage  │
+   │    Firewall    │           │ (breacherips.db)│
+   │   Controller   │           └─────────────────┘
+   └────────┬───────┘
+            │
+            ▼ [System Call Wrapper]
+   ┌────────────────┐
+   │   Netfilter    │
+   │  (iptables)    │
+   └────────────────┘
