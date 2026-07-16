@@ -6,7 +6,6 @@ A multi-threaded, asynchronous Host-based Intrusion Prevention System (HIPS) eng
 
 The system uses an asynchronous execution queue to guarantee zero-drop packet monitoring under intense traffic streams.
        ┌──────────────────────┐
-       ┌──────────────────────┐
        │  Raw Network Socket  │
        └──────────┬───────────┘
                   │
